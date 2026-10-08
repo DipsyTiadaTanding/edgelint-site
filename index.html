@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EdgeLint — Research and risk control for futures strategies</title>
+<meta name="description" content="EdgeLint is a pre-launch platform of AI agents that turn prop firm rules and trading ideas into testable, rule-compliant futures strategies. Research and risk-control tool, not financial advice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f4ef; --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e2ded4;
+    --accent:#1f6f5c; --accent-soft:#e3f0ea; --warn:#9a5b13; --warn-soft:#f6ecdc;
+    --guess:#7a3b8f; --guess-soft:#f1e6f5;
+    --radius:14px; --max:1080px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#111317; --surface:#181b21; --ink:#eceae4; --muted:#a0a6b1; --line:#2a2f38;
+      --accent:#5fc3a6; --accent-soft:#16302a; --warn:#e0a35a; --warn-soft:#33271a;
+      --guess:#c793d9; --guess-soft:#2c2033;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+
+  header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{font-weight:700;letter-spacing:-.02em;font-size:18px;text-decoration:none;display:flex;align-items:center;gap:8px}
+  .brand .dot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
+  nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:20px}
+  nav a:hover{color:var(--ink)}
+  @media (max-width:640px){nav .hide-sm{display:none}}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;transition:transform .15s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--ink);color:var(--bg)}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:var(--surface)}
+
+  .hero{padding:88px 0 64px}
+  .badge{display:inline-block;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:500;margin-bottom:22px}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-.035em;margin:0 0 20px;max-width:16ch}
+  .lede{font-size:clamp(17px,2.2vw,20px);color:var(--muted);max-width:58ch;margin:0 0 32px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  h2{font-size:clamp(26px,3.6vw,36px);letter-spacing:-.025em;line-height:1.15;margin:0 0 16px;max-width:24ch}
+  .sub{color:var(--muted);max-width:62ch;margin:0 0 36px}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  @media (max-width:820px){.grid3,.grid2{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+  .card h3{margin:0 0 8px;font-size:17px;letter-spacing:-.01em}
+  .card p{margin:0;color:var(--muted);font-size:15px}
+  .card .k{font-size:13px;color:var(--warn);margin-bottom:10px;display:block}
+
+  /* pipeline */
+  .pipe{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
+  .pipe li{position:relative;padding:22px 18px 22px 18px;background:var(--surface);border:1px solid var(--line);border-left:none}
+  .pipe li:first-child{border-left:1px solid var(--line);border-radius:var(--radius) 0 0 var(--radius)}
+  .pipe li:last-child{border-radius:0 var(--radius) var(--radius) 0}
+  .pipe li::before{counter-increment:s;content:"0" counter(s);font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);display:block;margin-bottom:10px}
+  .pipe h3{font-size:16px;margin:0 0 6px}
+  .pipe p{margin:0;font-size:14px;color:var(--muted)}
+  .gate{display:inline-block;margin-top:12px;font-size:11px;padding:3px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+  @media (max-width:900px){
+    .pipe{grid-template-columns:1fr}
+    .pipe li,.pipe li:first-child,.pipe li:last-child{border:1px solid var(--line);border-radius:0;border-top:none}
+    .pipe li:first-child{border-top:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0}
+    .pipe li:last-child{border-radius:0 0 var(--radius) var(--radius)}
+  }
+
+  /* evidence spec sample */
+  .spec{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .spec .bar{padding:10px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+  .spec ul{list-style:none;margin:0;padding:8px 0}
+  .spec li{display:flex;gap:12px;align-items:flex-start;padding:10px 16px;font-size:14px}
+  .tag{flex:none;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500;min-width:62px;text-align:center}
+  .t-said{background:var(--accent-soft);color:var(--accent)}
+  .t-shown{background:var(--warn-soft);color:var(--warn)}
+  .t-guess{background:var(--guess-soft);color:var(--guess)}
+  .note{font-size:12px;color:var(--muted);padding:0 16px 14px}
+
+  /* roadmap */
+  .road{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+  .road li{position:relative;padding:0 0 22px 22px}
+  .road li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+  .road li.done::before{background:var(--accent);border-color:var(--accent)}
+  .road li.now::before{border-color:var(--accent)}
+  .road .st{font-size:12px;color:var(--muted)}
+  .road b{display:block;font-weight:600}
+
+  .founder{display:flex;gap:18px;align-items:center}
+  .avatar{width:56px;height:56px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:22px;flex:none}
+
+  footer{border-top:1px solid var(--line);padding:40px 0 56px;font-size:14px;color:var(--muted)}
+  .disclaimer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;color:var(--ink);font-size:14px;margin-bottom:24px}
+  .disclaimer strong{display:block;margin-bottom:4px}
+  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><span class="dot" aria-hidden="true"></span>EdgeLint</a>
+    <nav>
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="#status">Status</a>
+      <a href="mailto:hello@edgelint.com?subject=EdgeLint%20early%20access">Early access</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <span class="badge mono">Pre-launch · Building in public</span>
+    <h1>Test the idea before it touches your account.</h1>
+    <p class="lede">EdgeLint is a set of AI agents that turn prop firm rules and trading ideas into sourced rulebooks, testable strategy specs and strict backtests, then check every strategy against your account limits before anything runs. You stay in control of every decision.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="mailto:hello@edgelint.com?subject=EdgeLint%20early%20access">Early access →</a>
+      <a class="btn btn-ghost" href="#how">See the pipeline</a>
+    </div>
+  </div>
+
+  <section id="problem">
+    <div class="wrap">
+      <p class="eyebrow">The problem</p>
+      <h2>Most strategies fail for reasons you could have checked first.</h2>
+      <p class="sub">Retail futures traders try ideas from videos, forums and courses. Many of those ideas break down for predictable, testable reasons long before market conditions are even the question.</p>
+      <div class="grid3">
+        <div class="card"><span class="k mono">costs</span><h3>Fees and slippage</h3><p>A backtest that ignores commissions and realistic fills can make a losing idea look attractive.</p></div>
+        <div class="card"><span class="k mono">bias</span><h3>Lookahead and overfitting</h3><p>Tuning on the same data you evaluate on, or using information that wasn't available yet, produces results that don't hold up.</p></div>
+        <div class="card"><span class="k mono">rules</span><h3>Account rule breaches</h3><p>Prop firm drawdown, daily loss, session and consistency rules can end an account even when the strategy itself is fine.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>Five stages. Each one is a gate.</h2>
+      <p class="sub">A strategy only moves forward when the previous stage passes. Nothing reaches a live account without clearing simulation and the risk guard.</p>
+      <ol class="pipe">
+        <li><h3>Rule research</h3><p>Agents read a prop firm's or broker's published rules and build a rulebook where every line links to its source.</p><span class="gate mono">sourced</span></li>
+        <li><h3>Idea intake</h3><p>A trading video is broken down from transcript and chart frames into a testable strategy spec.</p><span class="gate mono">labeled</span></li>
+        <li><h3>Strict backtest</h3><p>Realistic costs, no lookahead, walk-forward plus a sealed holdout, minimum trade counts and bias checks.</p><span class="gate mono">validated</span></li>
+        <li><h3>Risk guard</h3><p>Every strategy is checked against the account's drawdown, per-trade loss, session and consistency rules.</p><span class="gate mono">compliant</span></li>
+        <li><h3>Execution</h3><p>Automated execution on the trading platform, only after the strategy passes simulation.</p><span class="gate mono">simulated first</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="different">
+    <div class="wrap">
+      <p class="eyebrow">What's different</p>
+      <h2>Evidence over confidence.</h2>
+      <p class="sub">Every output says where it came from and how sure it is, so you can judge it yourself.</p>
+      <div class="grid2">
+        <div>
+          <div class="grid2" style="grid-template-columns:1fr;gap:16px">
+            <div class="card"><h3>Verified rulebooks</h3><p>Account rules are extracted with citations to the firm's own pages, not paraphrased from memory.</p></div>
+            <div class="card"><h3>Evidence-labeled strategy specs</h3><p>Each rule in a spec is marked as stated in the video, shown on the chart, or inferred, so guesses are never mistaken for facts.</p></div>
+            <div class="card"><h3>A strict backtest standard</h3><p>One written standard for costs, data splits and bias checks, applied to every strategy the same way.</p></div>
+            <div class="card"><h3>Risk guard before execution</h3><p>Account limits are enforced as a hard check, not a reminder.</p></div>
+          </div>
+        </div>
+        <div>
+          <div class="spec" role="figure" aria-label="Example of an evidence-labeled strategy spec">
+            <div class="bar mono"><span>strategy_spec.example</span><span>illustrative</span></div>
+            <ul>
+              <li><span class="tag t-said mono">said</span><span>Trade only during the New York morning session.</span></li>
+              <li><span class="tag t-shown mono">shown</span><span>Entry on a pullback to the prior swing level, as drawn on the chart.</span></li>
+              <li><span class="tag t-said mono">said</span><span>Stop goes below the most recent swing low.</span></li>
+              <li><span class="tag t-guess mono">guessed</span><span>Exit rule not stated; assumed fixed 2R target. Needs review.</span></li>
+            </ul>
+            <p class="note">Example format only. Not a recommendation and not a tested strategy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="wrap">
+      <p class="eyebrow">Status</p>
+      <h2>Pre-launch. Building in public.</h2>
+      <p class="sub">There are no users, customers or performance results yet. Here is exactly where things stand.</p>
+      <ul class="road">
+        <li class="done"><span class="st mono">Done</span><b>Private prototype</b>Prop firm due-diligence dossier, sourced rules table, data plan, backtest standard, and agent skills for rule checking, video-to-strategy breakdown and backtest review.</li>
+        <li class="now"><span class="st mono">Now</span><b>First end-to-end backtest</b>Run the first strategy through the full backtest standard and publish the method, whatever the result.</li>
+        <li><span class="st mono">Next</span><b>Risk guard in simulation</b>Enforce account rules against simulated trading before any automation.</li>
+        <li><span class="st mono">Later</span><b>Early access for a small group of traders</b>Research and risk-control tooling first; execution features only after they are proven in simulation.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="founder">
+    <div class="wrap">
+      <p class="eyebrow">Who's building it</p>
+      <div class="founder">
+        <div class="avatar" aria-hidden="true">D</div>
+        <div><strong>Dipsy</strong><br><span style="color:var(--muted)">Solo founder, Indonesia</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="disclaimer">
+      <strong>Risk disclaimer</strong>
+      Trading futures involves substantial risk of loss. This product is a research and risk-control tool, not financial advice. Past or simulated performance does not guarantee future results.
+    </div>
+    <div class="foot">
+      <span>© <span id="y">2026</span> EdgeLint</span>
+      <a href="mailto:hello@edgelint.com">hello@edgelint.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
