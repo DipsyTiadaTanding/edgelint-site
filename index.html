@@ -3,229 +3,970 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EdgeLint — Research and risk control for futures strategies</title>
-<meta name="description" content="EdgeLint is a pre-launch platform of AI agents that turn prop firm rules and trading ideas into testable, rule-compliant futures strategies. Research and risk-control tool, not financial advice.">
+<title>EdgeLint — Lint your futures strategy before your account pays for it</title>
+<meta name="description" content="EdgeLint is a pre-launch set of AI agents that turn prop firm rules and trading ideas into sourced rulebooks, labeled strategy specs and strict backtests. A research and risk-control tool, not financial advice.">
+<link rel="canonical" href="https://edgelint.com/">
+<meta name="theme-color" content="#09090F">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://edgelint.com/">
+<meta property="og:title" content="EdgeLint — Lint your futures strategy before your account pays for it">
+<meta property="og:description" content="AI agents for sourced prop firm rulebooks, evidence-labeled strategy specs, strict backtests and a risk guard. Pre-launch. Research and risk-control tool, not financial advice.">
+<meta property="og:image" content="https://edgelint.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  (function(){
+    var r=document.documentElement,l=null;
+    try{l=localStorage.getItem('el-lang')}catch(e){}
+    if(l==='id'||l==='en')r.lang=l;
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      r.classList.add('m');
+      setTimeout(function(){if(!r.classList.contains('m-ok'))r.classList.remove('m')},3500);
+    }
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
 <style>
   :root{
-    --bg:#f6f4ef; --surface:#ffffff; --ink:#16181d; --muted:#5b616e; --line:#e2ded4;
-    --accent:#1f6f5c; --accent-soft:#e3f0ea; --warn:#9a5b13; --warn-soft:#f6ecdc;
-    --guess:#7a3b8f; --guess-soft:#f1e6f5;
-    --radius:14px; --max:1080px;
+    --void:#09090F; --panel:#12121C; --panel-2:#181826; --rule:#26263D; --rule-2:#34344F;
+    --bone:#EEEDF6; --ash:#A3A1B8;
+    --violet:#8E7BFF; --violet-dim:rgba(142,123,255,.14);
+    --breach:#FF4D5E; --breach-dim:rgba(255,77,94,.14);
+    --amber:#F5A524; --amber-dim:rgba(245,165,36,.14);
+    --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+    --f-body:Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --f-mono:"Geist Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --max:1200px; --gutter:clamp(16px,4vw,40px); --sec:clamp(88px,12vw,160px);
+    --r:16px; --r-sm:10px;
+    --nav-h:72px;
+    --ease:cubic-bezier(.2,.7,.2,1);
   }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#111317; --surface:#181b21; --ink:#eceae4; --muted:#a0a6b1; --line:#2a2f38;
-      --accent:#5fc3a6; --accent-soft:#16302a; --warn:#e0a35a; --warn-soft:#33271a;
-      --guess:#c793d9; --guess-soft:#2c2033;
-    }
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;color-scheme:dark}
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto!important}
+  .lenis.lenis-stopped{overflow:hidden}
+  body{margin:0;background:var(--void);color:var(--bone);font:400 17px/1.65 var(--f-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+  @media (max-width:640px){body{font-size:16px}}
+  img,svg{display:block;max-width:100%}
   a{color:inherit}
-  .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
-  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+  button{font:inherit;color:inherit;cursor:pointer}
+  ::selection{background:var(--violet);color:var(--void)}
+  :focus-visible{outline:2px solid var(--violet);outline-offset:3px;border-radius:6px}
+  [tabindex="-1"]:focus{outline:none}
+  [id]{scroll-margin-top:calc(var(--nav-h) + 16px)}
 
-  header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
-  .brand{font-weight:700;letter-spacing:-.02em;font-size:18px;text-decoration:none;display:flex;align-items:center;gap:8px}
-  .brand .dot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
-  nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:20px}
-  nav a:hover{color:var(--ink)}
-  @media (max-width:640px){nav .hide-sm{display:none}}
+  html[lang="id"] .en{display:none!important}
+  html:not([lang="id"]) .id{display:none!important}
 
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;transition:transform .15s ease}
-  .btn:hover{transform:translateY(-1px)}
-  .btn-primary{background:var(--ink);color:var(--bg)}
-  .btn-ghost{border-color:var(--line);color:var(--ink);background:var(--surface)}
+  .wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gutter)}
+  .mono{font-family:var(--f-mono);font-feature-settings:"zero" 1}
+  .skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--violet);color:var(--void);padding:10px 14px;border-radius:8px;font-weight:600;text-decoration:none}
+  .skip:focus{top:12px}
 
-  .hero{padding:88px 0 64px}
-  .badge{display:inline-block;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:500;margin-bottom:22px}
-  h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-.035em;margin:0 0 20px;max-width:16ch}
-  .lede{font-size:clamp(17px,2.2vw,20px);color:var(--muted);max-width:58ch;margin:0 0 32px}
+  /* motion gating: hidden only while JS motion is active */
+  .m [data-reveal],.m [data-intro]{opacity:0;transform:translateY(24px)}
+
+  /* ---------- header ---------- */
+  .top{position:fixed;inset:0 0 auto 0;z-index:50;height:var(--nav-h);transition:background-color .3s var(--ease),border-color .3s var(--ease),height .3s var(--ease);border-bottom:1px solid transparent}
+  .top.scrolled{--nav-h:60px;height:60px;background:rgba(9,9,15,.78);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom-color:var(--rule)}
+  .top .wrap{display:flex;align-items:center;gap:20px;height:100%}
+  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 19px/1 var(--f-display);letter-spacing:-.02em;min-height:44px}
+  .brand img{width:30px;height:30px}
+  .nav-links{display:flex;gap:4px;margin-left:auto}
+  .nav-links a{font-size:14.5px;color:var(--ash);text-decoration:none;padding:10px 12px;border-radius:8px;transition:color .2s}
+  .nav-links a:hover{color:var(--bone)}
+  .lang{display:inline-flex;border:1px solid var(--rule-2);border-radius:999px;padding:3px;gap:2px}
+  .lang button{background:none;border:0;min-width:40px;height:36px;border-radius:999px;font:500 12.5px/1 var(--f-mono);letter-spacing:.06em;color:var(--ash);transition:background-color .2s,color .2s}
+  .lang button[aria-pressed="true"]{background:var(--bone);color:var(--void)}
+  .lang button:hover[aria-pressed="false"]{color:var(--bone)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:999px;font:600 15.5px/1 var(--f-body);text-decoration:none;border:1px solid transparent;background:none;transition:transform .25s var(--ease),background-color .25s,border-color .25s,color .25s;white-space:nowrap}
+  .btn svg{width:16px;height:16px;transition:transform .25s var(--ease)}
+  .btn:hover svg{transform:translateX(3px)}
+  .btn-primary{background:var(--violet);color:var(--void)}
+  .btn-primary:hover{background:#A595FF}
+  .btn-ghost{border-color:var(--rule-2);color:var(--bone)}
+  .btn-ghost:hover{border-color:var(--ash)}
+  .btn-sm{min-height:40px;padding:0 16px;font-size:14px}
+  .menu-btn{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--rule-2);background:none;position:relative}
+  .menu-btn span{position:absolute;left:12px;right:12px;height:1.5px;background:var(--bone);transition:transform .3s var(--ease)}
+  .menu-btn span:first-child{top:17px}.menu-btn span:last-child{top:25px}
+  .menu-btn[aria-expanded="true"] span:first-child{transform:translateY(4px) rotate(45deg)}
+  .menu-btn[aria-expanded="true"] span:last-child{transform:translateY(-4px) rotate(-45deg)}
+  @media (max-width:959.98px){
+    .nav-links,.top .lang,.top .btn{display:none}
+    .menu-btn{display:block;margin-left:auto}
+  }
+  .menu{position:fixed;inset:0;z-index:40;background:rgba(9,9,15,.97);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:calc(var(--nav-h) + 24px) var(--gutter) 32px;display:flex;flex-direction:column;gap:28px;opacity:0;transition:opacity .3s var(--ease);overflow-y:auto}
+  .menu.open{opacity:1}
+  .menu nav{display:flex;flex-direction:column}
+  .menu nav a{font:600 clamp(30px,8vw,40px)/1.15 var(--f-display);letter-spacing:-.025em;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--rule);transform:translateY(12px);opacity:0;transition:transform .45s var(--ease),opacity .45s var(--ease)}
+  .menu.open nav a{transform:none;opacity:1}
+  .menu.open nav a:nth-child(2){transition-delay:.04s}.menu.open nav a:nth-child(3){transition-delay:.08s}.menu.open nav a:nth-child(4){transition-delay:.12s}
+  .menu-foot{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .menu .lang button{min-width:52px;height:40px}
+
+  /* ---------- type ---------- */
+  .eyebrow{display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ash);margin:0 0 22px}
+  .eyebrow::before{content:"";width:7px;height:7px;background:var(--violet);border-radius:2px}
+  .h2{font:700 clamp(30px,4.2vw,52px)/1.06 var(--f-display);font-stretch:92%;letter-spacing:-.024em;margin:0 0 20px;max-width:20ch;text-wrap:balance}
+  .sub{color:var(--ash);max-width:60ch;margin:0;font-size:clamp(16px,1.6vw,18.5px);text-wrap:pretty}
+  .sh{margin-bottom:clamp(40px,6vw,72px)}
+  .sec{padding-block:var(--sec);position:relative}
+  .sec + .sec{border-top:1px solid var(--rule)}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding-top:calc(var(--nav-h) + clamp(36px,6vw,80px));padding-bottom:clamp(72px,9vw,128px);overflow:hidden}
+  .hero-bg{position:absolute;inset:-10% 0 0 0;background:url(assets/blueprint.webp) center top/cover no-repeat;opacity:.17;mix-blend-mode:screen;-webkit-mask-image:radial-gradient(120% 80% at 70% 20%,#000 30%,transparent 75%);mask-image:radial-gradient(120% 80% at 70% 20%,#000 30%,transparent 75%);pointer-events:none}
+  .hero-glow{position:absolute;width:900px;height:900px;right:-300px;top:-380px;background:radial-gradient(closest-side,rgba(142,123,255,.20),transparent 70%);pointer-events:none}
+  .hero .wrap{position:relative}
+  .badge{display:inline-flex;align-items:center;gap:10px;font:500 12.5px/1 var(--f-mono);letter-spacing:.06em;color:var(--amber);border:1px solid rgba(245,165,36,.35);background:var(--amber-dim);padding:9px 14px;border-radius:999px;margin-bottom:28px}
+  .badge i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 0 rgba(245,165,36,.6);animation:ping 2.4s infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(245,165,36,.55)}70%,100%{box-shadow:0 0 0 9px rgba(245,165,36,0)}}
+  .h1{font:700 clamp(40px,5.6vw,80px)/1.02 var(--f-display);font-stretch:90%;letter-spacing:-.028em;margin:0;max-width:21ch;text-wrap:balance}
+  .sq{text-decoration:underline wavy;text-decoration-color:var(--breach);text-decoration-thickness:2px;text-underline-offset:.16em;text-decoration-skip-ink:none}
+  .m .sq{text-decoration-color:transparent;transition:text-decoration-color .9s var(--ease)}
+  .m .sq.on{text-decoration-color:var(--breach)}
+  .hero-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(32px,4vw,56px);margin-top:clamp(32px,4vw,52px);align-items:start}
+  .hero-copy{grid-column:1/span 5}
+  .hero-fig{grid-column:6/span 7}
+  .lede{font-size:clamp(17px,1.5vw,19px);color:var(--ash);margin:0 0 32px;text-wrap:pretty}
+  .lede strong{color:var(--bone);font-weight:500}
   .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .fine{margin:22px 0 0;font:400 12.5px/1.5 var(--f-mono);color:var(--ash);letter-spacing:.02em}
+  @media (max-width:959.98px){.hero-copy,.hero-fig{grid-column:1/-1}}
 
-  section{padding:64px 0;border-top:1px solid var(--line)}
-  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
-  h2{font-size:clamp(26px,3.6vw,36px);letter-spacing:-.025em;line-height:1.15;margin:0 0 16px;max-width:24ch}
-  .sub{color:var(--muted);max-width:62ch;margin:0 0 36px}
-
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-  @media (max-width:820px){.grid3,.grid2{grid-template-columns:1fr}}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
-  .card h3{margin:0 0 8px;font-size:17px;letter-spacing:-.01em}
-  .card p{margin:0;color:var(--muted);font-size:15px}
-  .card .k{font-size:13px;color:var(--warn);margin-bottom:10px;display:block}
-
-  /* pipeline */
-  .pipe{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
-  .pipe li{position:relative;padding:22px 18px 22px 18px;background:var(--surface);border:1px solid var(--line);border-left:none}
-  .pipe li:first-child{border-left:1px solid var(--line);border-radius:var(--radius) 0 0 var(--radius)}
-  .pipe li:last-child{border-radius:0 var(--radius) var(--radius) 0}
-  .pipe li::before{counter-increment:s;content:"0" counter(s);font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);display:block;margin-bottom:10px}
-  .pipe h3{font-size:16px;margin:0 0 6px}
-  .pipe p{margin:0;font-size:14px;color:var(--muted)}
-  .gate{display:inline-block;margin-top:12px;font-size:11px;padding:3px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
-  @media (max-width:900px){
-    .pipe{grid-template-columns:1fr}
-    .pipe li,.pipe li:first-child,.pipe li:last-child{border:1px solid var(--line);border-radius:0;border-top:none}
-    .pipe li:first-child{border-top:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0}
-    .pipe li:last-child{border-radius:0 0 var(--radius) var(--radius)}
+  /* lint panel */
+  .panel{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;box-shadow:0 40px 80px -40px rgba(0,0,0,.8)}
+  .panel-bar{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--rule);font:500 12.5px/1 var(--f-mono);color:var(--ash)}
+  .panel-bar .file{color:var(--bone)}
+  .chip{font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:6px;color:var(--amber);background:var(--amber-dim);white-space:nowrap}
+  .replay{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--rule-2);border-radius:8px;min-height:36px;padding:0 12px;font:500 12.5px/1 var(--f-mono);color:var(--ash);transition:color .2s,border-color .2s}
+  .replay:hover{color:var(--bone);border-color:var(--ash)}
+  .replay svg{width:13px;height:13px}
+  html:not(.m) .replay{display:none}
+  .lc{padding:8px 6px 0}
+  .lc svg{width:100%;height:auto;overflow:visible}
+  .lc .grid line{stroke:var(--rule);stroke-width:1}
+  .lc .base{stroke:var(--rule-2);stroke-dasharray:2 4}
+  .lc .ghost{fill:none;stroke:var(--ash);stroke-width:1.5;stroke-dasharray:3 5;opacity:.45}
+  .lc .ghost-lbl{fill:var(--ash);font:500 11px var(--f-mono)}
+  .lc .eq{fill:none;stroke:var(--amber);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(245,165,36,.35))}
+  .lc .tail{fill:none;stroke:var(--breach);stroke-width:2;stroke-dasharray:4 5;opacity:.55}
+  .lc .hold rect{fill:var(--violet-dim)}
+  .lc .hold line{stroke:var(--violet);stroke-dasharray:3 4;opacity:.7}
+  .lc .hold text{fill:var(--violet);font:500 11px var(--f-mono);letter-spacing:.06em}
+  .lc .limit line{stroke:var(--breach);stroke-width:1.5;stroke-dasharray:6 5}
+  .lc .limit text{fill:var(--breach);font:500 11px var(--f-mono);letter-spacing:.04em}
+  .lc .breach circle{fill:var(--breach)}
+  .lc .breach .ring{fill:none;stroke:var(--breach);stroke-width:1.5;transform-box:fill-box;transform-origin:center;animation:ring 1.8s var(--ease) infinite}
+  .lc .breach rect{fill:var(--breach)}
+  .lc .breach text{fill:var(--void);font:700 10.5px var(--f-mono);letter-spacing:.08em}
+  @keyframes ring{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+  .log{list-style:none;margin:0;padding:14px 16px 16px;border-top:1px solid var(--rule);font:400 13px/1.45 var(--f-mono);display:grid;gap:8px}
+  .log li{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:baseline}
+  .log .c{font-weight:500}
+  .log .w{color:var(--amber)} .log .e{color:var(--breach)}
+  .log .fx{color:var(--violet);text-align:right;white-space:nowrap}
+  .log .blk{color:var(--breach)}
+  .log .res{grid-template-columns:1fr;padding-top:10px;margin-top:2px;border-top:1px dashed var(--rule-2);color:var(--bone)}
+  .log .res b{color:var(--breach);font-weight:500}
+  @media (max-width:640px){
+    .log li{grid-template-columns:40px 1fr}
+    .log .fx{grid-column:2;text-align:left}
+    .panel-bar .file{display:none}
+    .replay{padding:0;width:36px;justify-content:center}
+    .replay span{display:none}
   }
 
-  /* evidence spec sample */
-  .spec{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  .spec .bar{padding:10px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+  /* ---------- problem ---------- */
+  .cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  @media (max-width:899.98px){.cards3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r);padding:clamp(22px,2.4vw,30px);transition:transform .35s var(--ease),border-color .35s}
+  .card:hover{transform:translateY(-4px);border-color:var(--rule-2)}
+  .card h3{font:650 21px/1.2 var(--f-display);letter-spacing:-.015em;margin:20px 0 10px}
+  .card p{margin:0;color:var(--ash);font-size:15.5px}
+  .ico{width:44px;height:44px;border-radius:12px;background:var(--panel-2);border:1px solid var(--rule);display:grid;place-items:center}
+  .ico svg{width:28px;height:28px;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.8}
+  .k{font:500 11.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--amber);float:right;margin-top:16px}
+
+  /* ---------- gates ---------- */
+  .gates{position:relative;padding-top:56px}
+  .rail{position:absolute;top:18px;left:10%;right:10%;height:2px;background:var(--rule)}
+  .rail-fill{position:absolute;inset:0;background:var(--violet);transform-origin:left center;transform:scaleX(0)}
+  html:not(.m) .rail-fill{transform:none}
+  .token{position:absolute;left:0;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 6px var(--amber-dim),0 0 24px rgba(245,165,36,.6)}
+  html:not(.m) .token{display:none}
+  .gate-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+  .gate{position:relative;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r);padding:22px 20px 20px;transition:border-color .4s var(--ease),background-color .4s var(--ease)}
+  .gate::before{content:"";position:absolute;left:50%;top:-45px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--void);border:2px solid var(--rule-2);transition:background-color .3s,border-color .3s}
+  .gate.on{border-color:rgba(142,123,255,.55);background:linear-gradient(180deg,rgba(142,123,255,.08),var(--panel) 60%)}
+  .gate.on::before{background:var(--violet);border-color:var(--violet)}
+  .g-num{font:500 12.5px/1 var(--f-mono);color:var(--violet)}
+  .gate h3{font:650 19px/1.2 var(--f-display);letter-spacing:-.015em;margin:14px 0 8px}
+  .gate p{margin:0 0 16px;color:var(--ash);font-size:14.5px;line-height:1.55}
+  .g-tag{display:inline-flex;align-items:center;gap:6px;font:500 11.5px/1 var(--f-mono);padding:6px 9px;border-radius:6px;background:var(--panel-2);color:var(--ash);border:1px solid var(--rule);transition:color .3s,background-color .3s,border-color .3s}
+  .g-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .gate.on .g-tag{color:var(--violet);background:var(--violet-dim);border-color:transparent}
+  @media (max-width:959.98px){
+    .gates{padding-top:0;padding-left:44px}
+    .rail{top:8px;bottom:8px;left:15px;right:auto;width:2px;height:auto}
+    .rail-fill{transform-origin:center top;transform:scaleY(0)}
+    .token{left:50%;top:0;margin:-8px 0 0 -8px}
+    .gate-list{grid-template-columns:1fr}
+    .gate::before{left:-36px;top:24px;margin-left:0}
+  }
+
+  /* ---------- demo ---------- */
+  .notice{display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(245,165,36,.35);background:var(--amber-dim);color:var(--bone);border-radius:var(--r-sm);padding:12px 16px;font-size:14.5px;margin-bottom:20px}
+  .notice svg{flex:none;width:18px;height:18px;margin-top:3px;stroke:var(--amber);fill:none;stroke-width:2}
+  .demo{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start}
+  .demo-main{grid-column:1/span 8}
+  .demo-side{grid-column:9/span 4;display:grid;gap:10px}
+  @media (max-width:959.98px){.demo-main,.demo-side{grid-column:1/-1}}
+  .dc{padding:10px 8px 4px}
+  .dc svg{width:100%;height:auto}
+  .dc .grid line{stroke:var(--rule)}
+  .dc .grid text{fill:var(--ash);font:400 11px var(--f-mono)}
+  .dc .zero{stroke:var(--rule-2)}
+  .dc .ghost{fill:none;stroke:var(--ash);stroke-width:1.3;stroke-dasharray:3 4;opacity:.45}
+  .dc .eq{fill:none;stroke:var(--amber);stroke-width:2.4;stroke-linejoin:round}
+  .dc .lim{fill:none;stroke:var(--breach);stroke-width:1.4;stroke-dasharray:6 5;transition:opacity .4s}
+  .dc .holdr{fill:var(--violet-dim);transition:opacity .4s}
+  .dc .bx{transition:opacity .3s}
+  .dc .bx circle{fill:var(--breach)}
+  .dc .bx .ring{fill:none;stroke:var(--breach);stroke-width:1.5;transform-box:fill-box;transform-origin:center;animation:ring 1.8s var(--ease) infinite}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:4px 16px 14px;font:400 12px/1.4 var(--f-mono);color:var(--ash)}
+  .legend span{display:inline-flex;align-items:center;gap:8px}
+  .legend i{width:18px;height:0;border-top:2px solid}
+  .legend .l-eq{border-color:var(--amber)} .legend .l-gh{border-top-style:dashed;border-color:var(--ash)} .legend .l-li{border-top-style:dashed;border-color:var(--breach)}
+  .legend .l-ho{height:10px;border:0;background:var(--violet-dim);outline:1px solid rgba(142,123,255,.4)}
+  .verdict{display:flex;gap:12px;align-items:flex-start;padding:16px;border-top:1px solid var(--rule);font-size:15px;min-height:76px}
+  .verdict .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--amber)}
+  .verdict[data-tone="bad"] .dot{background:var(--breach)}
+  .verdict[data-tone="good"] .dot{background:var(--violet)}
+  .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule)}
+  .metric{padding:14px 16px;border-left:1px solid var(--rule)}
+  .metric:first-child{border-left:0}
+  .metric dt{font:500 11px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ash)}
+  .metric dd{margin:6px 0 0;font:600 20px/1.1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .metrics-cap{grid-column:1/-1;padding:8px 16px;border-top:1px solid var(--rule);font:400 11.5px/1.4 var(--f-mono);color:var(--amber);letter-spacing:.04em}
+  @media (max-width:640px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:nth-child(3){border-left:0}.metric:nth-child(n+3){border-top:1px solid var(--rule)}.metric dd{font-size:18px}}
+  .sw{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-sm);padding:14px 16px;min-height:64px;transition:border-color .25s,background-color .25s}
+  .sw:hover{border-color:var(--rule-2)}
+  .sw[aria-checked="true"]{border-color:rgba(142,123,255,.55);background:linear-gradient(90deg,rgba(142,123,255,.08),var(--panel))}
+  .sw-ui{flex:none;position:relative;width:40px;height:24px;border-radius:999px;background:var(--rule-2);transition:background-color .25s}
+  .sw-ui::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--bone);transition:transform .3s var(--ease)}
+  .sw[aria-checked="true"] .sw-ui{background:var(--violet)}
+  .sw[aria-checked="true"] .sw-ui::after{transform:translateX(16px)}
+  .sw b{display:block;font-weight:600;font-size:15px;line-height:1.3}
+  .sw small{display:block;color:var(--ash);font-size:13px;line-height:1.4;margin-top:2px}
+  .range{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-sm);padding:14px 16px;transition:opacity .25s}
+  .range.off{opacity:.5}
+  .range label{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--ash)}
+  .range output{font:500 14px var(--f-mono);color:var(--bone)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:6px 0 0}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--rule-2)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--rule-2)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:var(--bone);border:4px solid var(--violet)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--bone);border:4px solid var(--violet)}
+  input[type=range]:disabled{cursor:not-allowed}
+  .demo-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .demo-btns .btn{flex:1 1 auto}
+
+  /* ---------- evidence ---------- */
+  .ev{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start}
+  .ev-list{grid-column:1/span 6;display:grid;gap:0;border-top:1px solid var(--rule)}
+  .ev-item{display:grid;grid-template-columns:28px 1fr;gap:14px;padding:22px 0;border-bottom:1px solid var(--rule)}
+  .ev-item svg{width:20px;height:20px;margin-top:4px;stroke:var(--violet);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .ev-item h3{font:650 19px/1.25 var(--f-display);letter-spacing:-.01em;margin:0 0 6px}
+  .ev-item p{margin:0;color:var(--ash);font-size:15.5px}
+  .ev-spec{grid-column:8/span 5;position:sticky;top:96px}
+  @media (max-width:959.98px){.ev-list,.ev-spec{grid-column:1/-1}.ev-spec{position:static}}
   .spec ul{list-style:none;margin:0;padding:8px 0}
-  .spec li{display:flex;gap:12px;align-items:flex-start;padding:10px 16px;font-size:14px}
-  .tag{flex:none;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500;min-width:62px;text-align:center}
-  .t-said{background:var(--accent-soft);color:var(--accent)}
-  .t-shown{background:var(--warn-soft);color:var(--warn)}
-  .t-guess{background:var(--guess-soft);color:var(--guess)}
-  .note{font-size:12px;color:var(--muted);padding:0 16px 14px}
+  .spec li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:12px 16px;font-size:14.5px;line-height:1.5}
+  .tag{font:500 11px/1 var(--f-mono);padding:5px 8px;border-radius:6px;min-width:74px;text-align:center;margin-top:2px}
+  .t-said{background:var(--violet-dim);color:var(--violet)}
+  .t-shown{background:rgba(238,237,246,.08);color:var(--bone)}
+  .t-guess{background:var(--amber-dim);color:var(--amber)}
+  .spec .note{margin:0;padding:12px 16px 16px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ash)}
 
-  /* roadmap */
-  .road{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
-  .road li{position:relative;padding:0 0 22px 22px}
-  .road li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
-  .road li.done::before{background:var(--accent);border-color:var(--accent)}
-  .road li.now::before{border-color:var(--accent)}
-  .road .st{font-size:12px;color:var(--muted)}
-  .road b{display:block;font-weight:600}
+  /* ---------- status ---------- */
+  .road{padding:0 0 0 36px;position:relative;max-width:760px}
+  .road ol{list-style:none;margin:0;padding:0}
+  .road-line{position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--rule)}
+  .road-fill{position:absolute;inset:0;background:linear-gradient(var(--violet),var(--amber));transform-origin:center top;transform:scaleY(.38)}
+  .road li{position:relative;padding:0 0 36px}
+  .road li:last-child{padding-bottom:0}
+  .road li::before{content:"";position:absolute;left:-36px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--void);border:2px solid var(--rule-2)}
+  .road li.done::before{background:var(--violet);border-color:var(--violet)}
+  .road li.now::before{border-color:var(--amber);box-shadow:0 0 0 5px var(--amber-dim)}
+  .road .st{font:500 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ash)}
+  .road li.done .st{color:var(--violet)} .road li.now .st{color:var(--amber)}
+  .road h3{font:650 clamp(20px,2.2vw,24px)/1.2 var(--f-display);letter-spacing:-.015em;margin:8px 0 6px}
+  .road p{margin:0;color:var(--ash);max-width:62ch}
 
-  .founder{display:flex;gap:18px;align-items:center}
-  .avatar{width:56px;height:56px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:22px;flex:none}
+  /* ---------- built with claude ---------- */
+  .bwc{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+  .bwc .sh{grid-column:1/span 5;margin:0}
+  .bwc-list{grid-column:7/span 6;margin:0;padding:0;list-style:none;border-top:1px solid var(--rule)}
+  @media (max-width:959.98px){.bwc .sh,.bwc-list{grid-column:1/-1}.bwc .sh{margin-bottom:32px}}
+  .bwc-list li{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:22px 0;border-bottom:1px solid var(--rule)}
+  .bwc-list .via{font:500 12px/1.6 var(--f-mono);color:var(--violet);letter-spacing:.04em}
+  .bwc-list h3{font:650 18px/1.3 var(--f-display);margin:0 0 4px}
+  .bwc-list p{margin:0;color:var(--ash);font-size:15.5px}
+  @media (max-width:640px){.bwc-list li{grid-template-columns:1fr;gap:6px}}
+  .indep{margin:24px 0 0;font-size:13.5px;color:var(--ash)}
 
-  footer{border-top:1px solid var(--line);padding:40px 0 56px;font-size:14px;color:var(--muted)}
-  .disclaimer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;color:var(--ink);font-size:14px;margin-bottom:24px}
-  .disclaimer strong{display:block;margin-bottom:4px}
-  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  /* ---------- founder ---------- */
+  .founder{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,3vw,40px);align-items:center;background:var(--panel);border:1px solid var(--rule);border-radius:calc(var(--r) + 8px);padding:clamp(24px,4vw,48px);position:relative;overflow:hidden}
+  .founder::after{content:"";position:absolute;right:-140px;bottom:-200px;width:480px;height:480px;background:radial-gradient(closest-side,rgba(245,165,36,.12),transparent);pointer-events:none}
+  .avatar{width:clamp(72px,9vw,112px);aspect-ratio:1;border-radius:24px;background:var(--panel-2);border:1px solid var(--rule-2);display:grid;place-items:center;font:750 clamp(34px,4vw,52px)/1 var(--f-display);color:var(--amber)}
+  .founder .founder-line{font:650 clamp(22px,2.6vw,30px)/1.2 var(--f-display);letter-spacing:-.02em;margin:0 0 8px;color:var(--bone)}
+  .founder p{margin:0 0 20px;color:var(--ash);max-width:56ch}
+  @media (max-width:640px){.founder{grid-template-columns:1fr}}
+
+  /* ---------- footer ---------- */
+  .foot{border-top:1px solid var(--rule);padding:56px 0 48px;font-size:14px;color:var(--ash)}
+  .disc{border:1px solid var(--rule);border-left:3px solid var(--breach);border-radius:var(--r-sm);padding:18px 20px;background:var(--panel);color:var(--bone);margin-bottom:32px}
+  .disc strong{display:block;font:500 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--breach);margin-bottom:10px}
+  .disc p{margin:0;font-size:14.5px}
+  .disc p + p{margin-top:8px;color:var(--ash)}
+  .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px 24px;align-items:center}
+  .foot-row a{text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+  .foot-row a:hover{color:var(--bone)}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  }
 </style>
 </head>
 <body>
+<a class="skip" href="#main"><span class="en">Skip to content</span><span class="id">Langsung ke konten</span></a>
 
-<header class="top">
+<header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="#"><span class="dot" aria-hidden="true"></span>EdgeLint</a>
-    <nav>
-      <a class="hide-sm" href="#how">How it works</a>
-      <a class="hide-sm" href="#status">Status</a>
-      <a href="mailto:hello@edgelint.com?subject=EdgeLint%20early%20access">Early access</a>
+    <a class="brand" href="#main" data-label-en="EdgeLint, back to top" data-label-id="EdgeLint, kembali ke atas"><img src="assets/logo.svg" alt="" width="30" height="30">EdgeLint</a>
+    <nav class="nav-links" data-label-en="Primary" data-label-id="Utama">
+      <a href="#how"><span class="en">How it works</span><span class="id">Cara kerja</span></a>
+      <a href="#demo"><span class="en">Demo</span><span class="id">Demo</span></a>
+      <a href="#status"><span class="en">Status</span><span class="id">Status</span></a>
+      <a href="#claude"><span class="en">Built with Claude</span><span class="id">Dibangun dengan Claude</span></a>
     </nav>
+    <div class="lang" role="group" data-label-en="Language" data-label-id="Bahasa">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="id" aria-pressed="false">ID</button>
+    </div>
+    <a class="btn btn-primary btn-sm" href="mailto:dipsy@edgelint.com?subject=EdgeLint%20early%20access"><span class="en">Early access</span><span class="id">Akses awal</span></a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-label-en="Menu" data-label-id="Menu"><span></span><span></span></button>
   </div>
 </header>
 
-<main>
-  <div class="wrap hero">
-    <span class="badge mono">Pre-launch · Building in public</span>
-    <h1>Test the idea before it touches your account.</h1>
-    <p class="lede">EdgeLint is a set of AI agents that turn prop firm rules and trading ideas into sourced rulebooks, testable strategy specs and strict backtests, then check every strategy against your account limits before anything runs. You stay in control of every decision.</p>
-    <div class="cta">
-      <a class="btn btn-primary" href="mailto:hello@edgelint.com?subject=EdgeLint%20early%20access">Early access →</a>
-      <a class="btn btn-ghost" href="#how">See the pipeline</a>
+<div class="menu" id="menu" hidden>
+  <nav data-label-en="Mobile" data-label-id="Seluler">
+    <a href="#how"><span class="en">How it works</span><span class="id">Cara kerja</span></a>
+    <a href="#demo"><span class="en">Demo</span><span class="id">Demo</span></a>
+    <a href="#status"><span class="en">Status</span><span class="id">Status</span></a>
+    <a href="#claude"><span class="en">Built with Claude</span><span class="id">Dibangun dengan Claude</span></a>
+  </nav>
+  <div class="menu-foot">
+    <div class="lang" role="group" data-label-en="Language" data-label-id="Bahasa">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="id" aria-pressed="false">ID</button>
     </div>
+    <a class="btn btn-primary" href="mailto:dipsy@edgelint.com?subject=EdgeLint%20early%20access"><span class="en">Get early access</span><span class="id">Minta akses awal</span></a>
   </div>
+</div>
 
-  <section id="problem">
+<main id="main" tabindex="-1">
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap">
-      <p class="eyebrow">The problem</p>
-      <h2>Most strategies fail for reasons you could have checked first.</h2>
-      <p class="sub">Retail futures traders try ideas from videos, forums and courses. Many of those ideas break down for predictable, testable reasons long before market conditions are even the question.</p>
-      <div class="grid3">
-        <div class="card"><span class="k mono">costs</span><h3>Fees and slippage</h3><p>A backtest that ignores commissions and realistic fills can make a losing idea look attractive.</p></div>
-        <div class="card"><span class="k mono">bias</span><h3>Lookahead and overfitting</h3><p>Tuning on the same data you evaluate on, or using information that wasn't available yet, produces results that don't hold up.</p></div>
-        <div class="card"><span class="k mono">rules</span><h3>Account rule breaches</h3><p>Prop firm drawdown, daily loss, session and consistency rules can end an account even when the strategy itself is fine.</p></div>
+      <p class="badge" data-intro><i aria-hidden="true"></i><span class="en">Pre-launch · Building in public</span><span class="id">Pra-peluncuran · Dibangun terbuka</span></p>
+      <h1 class="h1" id="hero-h" data-intro>
+        <span class="en">Lint your strategy before <span class="sq">your account pays for it.</span></span>
+        <span class="id">Periksa strategi Anda sebelum <span class="sq">akun Anda yang membayarnya.</span></span>
+      </h1>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="lede" data-intro>
+            <span class="en">EdgeLint is a set of AI agents for futures traders. They turn prop firm rules and trading ideas into <strong>sourced rulebooks, labeled strategy specs and strict backtests</strong>, then check every strategy against your account limits before anything runs.</span>
+            <span class="id">EdgeLint adalah kumpulan agent AI untuk trader futures. Agent ini mengubah aturan prop firm dan ide trading menjadi <strong>buku aturan bersumber, spesifikasi strategi berlabel, dan backtest yang ketat</strong>, lalu mengecek setiap strategi terhadap batas akun Anda sebelum apa pun dijalankan.</span>
+          </p>
+          <div class="cta" data-intro>
+            <a class="btn btn-primary" href="mailto:dipsy@edgelint.com?subject=EdgeLint%20early%20access"><span class="en">Get early access</span><span class="id">Minta akses awal</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+            <a class="btn btn-ghost" href="#demo"><span class="en">Try the demo</span><span class="id">Coba demonya</span></a>
+          </div>
+          <p class="fine" data-intro><span class="en">Research and risk-control tool · not signals · not financial advice</span><span class="id">Alat riset &amp; kontrol risiko · bukan sinyal · bukan nasihat keuangan</span></p>
+        </div>
+
+        <figure class="hero-fig" style="margin:0" data-intro>
+          <div class="panel">
+            <div class="panel-bar">
+              <span class="file">backtest.lint</span>
+              <span class="chip"><span class="en">Synthetic data · illustration only</span><span class="id">Data sintetis · hanya ilustrasi</span></span>
+              <button class="replay" type="button" id="replay" data-label-en="Replay animation" data-label-id="Ulangi animasi"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9M2.5 2.5v3h3"/></svg><span class="en">Replay</span><span class="id">Ulangi</span></button>
+            </div>
+            <div class="lc">
+              <svg id="lc" viewBox="0 0 640 330" role="img"
+                data-label-en="Synthetic illustration: an equity curve that looks profitable until fees, lookahead removal and a sealed holdout are applied. It then crosses an example account loss limit and is blocked by the risk guard."
+                data-label-id="Ilustrasi sintetis: kurva equity yang tampak untung sampai biaya, penghapusan lookahead, dan holdout tersegel diterapkan. Kurva lalu menembus contoh batas rugi akun dan diblokir oleh risk guard.">
+                <g class="grid" id="lc-grid"></g>
+                <g class="hold" id="lc-hold">
+                  <rect id="lc-hold-r"/><line id="lc-hold-l"/>
+                  <text id="lc-hold-t1" class="en">SEALED HOLDOUT</text><text id="lc-hold-t2" class="id">HOLDOUT TERSEGEL</text>
+                </g>
+                <line class="base" id="lc-base"/>
+                <path class="ghost" id="lc-ghost"/>
+                <text class="ghost-lbl en" id="lc-gl1" text-anchor="end">unchecked</text><text class="ghost-lbl id" id="lc-gl2" text-anchor="end">belum dicek</text>
+                <g class="limit" id="lc-limit"><line id="lc-limit-l"/><text id="lc-limit-t1" class="en">MAX LOSS LIMIT · EXAMPLE</text><text id="lc-limit-t2" class="id">BATAS RUGI MAKS. · CONTOH</text></g>
+                <path class="tail" id="lc-tail"/>
+                <path class="eq" id="lc-eq"/>
+                <g class="breach" id="lc-breach"><circle class="ring" r="7"/><circle r="5.5"/><rect id="lc-br-r" width="62" height="20" rx="4"/><text id="lc-br-t">BREACH</text></g>
+              </svg>
+            </div>
+            <ol class="log" id="log" aria-label="Lint output">
+              <li data-step="1"><span class="c w">W01</span><span><span class="en">no fees or slippage modeled</span><span class="id">biaya &amp; slippage belum dihitung</span></span><span class="fx"><span class="en">fix: costs applied</span><span class="id">perbaikan: biaya diterapkan</span></span></li>
+              <li data-step="2"><span class="c w">W02</span><span><span class="en">lookahead: uses a bar's close too early</span><span class="id">lookahead: memakai harga close terlalu dini</span></span><span class="fx"><span class="en">fix: removed</span><span class="id">perbaikan: dihapus</span></span></li>
+              <li data-step="3"><span class="c e">E03</span><span><span class="en">tuned and scored on the same data</span><span class="id">dioptimasi &amp; dinilai di data yang sama</span></span><span class="fx"><span class="en">run: sealed holdout</span><span class="id">uji: holdout tersegel</span></span></li>
+              <li data-step="4"><span class="c e">E04</span><span><span class="en">example max loss limit crossed</span><span class="id">contoh batas rugi maks. terlewati</span></span><span class="fx blk"><span class="en">blocked: risk guard</span><span class="id">diblokir: risk guard</span></span></li>
+              <li data-step="5" class="res"><span><span class="en"><b>result: blocked.</b> This idea never reaches a live account.</span><span class="id"><b>hasil: diblokir.</b> Ide ini tidak pernah sampai ke akun live.</span></span></li>
+            </ol>
+          </div>
+        </figure>
       </div>
     </div>
   </section>
 
-  <section id="how">
+  <!-- PROBLEM -->
+  <section class="sec" id="problem" aria-labelledby="problem-h">
     <div class="wrap">
-      <p class="eyebrow">How it works</p>
-      <h2>Five stages. Each one is a gate.</h2>
-      <p class="sub">A strategy only moves forward when the previous stage passes. Nothing reaches a live account without clearing simulation and the risk guard.</p>
-      <ol class="pipe">
-        <li><h3>Rule research</h3><p>Agents read a prop firm's or broker's published rules and build a rulebook where every line links to its source.</p><span class="gate mono">sourced</span></li>
-        <li><h3>Idea intake</h3><p>A trading video is broken down from transcript and chart frames into a testable strategy spec.</p><span class="gate mono">labeled</span></li>
-        <li><h3>Strict backtest</h3><p>Realistic costs, no lookahead, walk-forward plus a sealed holdout, minimum trade counts and bias checks.</p><span class="gate mono">validated</span></li>
-        <li><h3>Risk guard</h3><p>Every strategy is checked against the account's drawdown, per-trade loss, session and consistency rules.</p><span class="gate mono">compliant</span></li>
-        <li><h3>Execution</h3><p>Automated execution on the trading platform, only after the strategy passes simulation.</p><span class="gate mono">simulated first</span></li>
-      </ol>
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">The problem</span><span class="id">Masalahnya</span></p>
+        <h2 class="h2" id="problem-h"><span class="en">Most strategies fail for reasons you could have checked first.</span><span class="id">Kebanyakan strategi gagal karena hal yang sebenarnya bisa dicek lebih dulu.</span></h2>
+        <p class="sub"><span class="en">Retail futures traders try ideas from videos, forums and courses. Many of those ideas break down for predictable, testable reasons long before market conditions are even the question.</span><span class="id">Trader futures ritel mencoba ide dari video, forum, dan kursus. Banyak ide itu gagal karena alasan yang bisa ditebak dan diuji, jauh sebelum kondisi pasar menjadi soal.</span></p>
+      </header>
+      <div class="cards3">
+        <article class="card" data-reveal>
+          <span class="k">costs</span>
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="draw" stroke="var(--ash)" d="M4 21 L11 13 L17 17 L28 6"/><path class="draw" stroke="var(--amber)" d="M4 26 L11 20 L17 25 L28 17"/></svg></div>
+          <h3><span class="en">Fees and slippage</span><span class="id">Biaya dan slippage</span></h3>
+          <p><span class="en">A backtest that ignores commissions and realistic fills can make a losing idea look attractive.</span><span class="id">Backtest yang mengabaikan komisi dan harga eksekusi yang realistis bisa membuat ide yang merugi terlihat menarik.</span></p>
+        </article>
+        <article class="card" data-reveal>
+          <span class="k">bias</span>
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="draw" stroke="var(--ash)" d="M3 16 C8 8.5 24 8.5 29 16 C24 23.5 8 23.5 3 16 Z"/><circle class="draw" stroke="var(--ash)" cx="16" cy="16" r="4"/><path class="draw" stroke="var(--amber)" d="M6 26 L26 6"/></svg></div>
+          <h3><span class="en">Lookahead and overfitting</span><span class="id">Lookahead dan overfitting</span></h3>
+          <p><span class="en">Tuning on the same data you evaluate on, or using information that wasn't available yet, produces results that don't hold up.</span><span class="id">Mengoptimasi di data yang sama dengan data penilaian, atau memakai informasi yang belum tersedia saat itu, menghasilkan hasil yang tidak bertahan.</span></p>
+        </article>
+        <article class="card" data-reveal>
+          <span class="k">rules</span>
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="draw" stroke="var(--ash)" d="M4 9 L11 13 L17 10 L22 16 L28 27"/><path stroke="var(--breach)" stroke-dasharray="3 3" d="M3 21 H29"/></svg></div>
+          <h3><span class="en">Account rule breaches</span><span class="id">Pelanggaran aturan akun</span></h3>
+          <p><span class="en">Prop firm drawdown, daily loss, session and consistency rules can end an account even when the strategy itself is fine.</span><span class="id">Aturan drawdown, rugi harian, sesi, dan konsistensi prop firm bisa mengakhiri akun meskipun strateginya sendiri baik-baik saja.</span></p>
+        </article>
+      </div>
     </div>
   </section>
 
-  <section id="different">
+  <!-- HOW -->
+  <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
+    <div class="wrap" id="how-pin">
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">How it works</span><span class="id">Cara kerjanya</span></p>
+        <h2 class="h2" id="how-h"><span class="en">Five stages. Each one is a gate.</span><span class="id">Lima tahap. Setiap tahap adalah gerbang.</span></h2>
+        <p class="sub"><span class="en">A strategy only moves forward when the previous stage passes. Nothing reaches a live account without clearing simulation and the risk guard.</span><span class="id">Strategi hanya maju jika tahap sebelumnya lolos. Tidak ada yang sampai ke akun live tanpa lolos simulasi dan risk guard.</span></p>
+      </header>
+      <div class="gates" id="gates">
+        <div class="rail" aria-hidden="true"><span class="rail-fill" id="rail-fill"></span><span class="token" id="token"></span></div>
+        <ol class="gate-list">
+          <li class="gate"><span class="g-num">01</span><h3><span class="en">Rule research</span><span class="id">Riset aturan</span></h3><p><span class="en">Agents read a prop firm's or broker's published rules and build a rulebook where every line links to its source.</span><span class="id">Agent membaca aturan resmi prop firm atau broker, lalu menyusun buku aturan yang setiap barisnya tertaut ke sumbernya.</span></p><span class="g-tag"><span class="en">sourced</span><span class="id">bersumber</span></span></li>
+          <li class="gate"><span class="g-num">02</span><h3><span class="en">Idea intake</span><span class="id">Masukan ide</span></h3><p><span class="en">A trading video is broken down from transcript and chart frames into a testable strategy spec.</span><span class="id">Video trading dibedah dari transkrip dan frame grafiknya menjadi spesifikasi strategi yang bisa diuji.</span></p><span class="g-tag"><span class="en">labeled</span><span class="id">berlabel</span></span></li>
+          <li class="gate"><span class="g-num">03</span><h3><span class="en">Strict backtest</span><span class="id">Backtest ketat</span></h3><p><span class="en">Realistic costs, no lookahead, walk-forward plus a sealed holdout, minimum trade counts and bias checks.</span><span class="id">Biaya realistis, tanpa lookahead, walk-forward plus holdout tersegel, jumlah trade minimum, dan cek bias.</span></p><span class="g-tag"><span class="en">validated</span><span class="id">tervalidasi</span></span></li>
+          <li class="gate"><span class="g-num">04</span><h3><span class="en">Risk guard</span><span class="id">Risk guard</span></h3><p><span class="en">Every strategy is checked against the account's drawdown, per-trade loss, session and consistency rules.</span><span class="id">Setiap strategi dicek terhadap aturan drawdown, rugi per trade, sesi, dan konsistensi akun.</span></p><span class="g-tag"><span class="en">compliant</span><span class="id">patuh aturan</span></span></li>
+          <li class="gate"><span class="g-num">05</span><h3><span class="en">Execution</span><span class="id">Eksekusi</span></h3><p><span class="en">Automated execution on the trading platform, only after the strategy passes simulation.</span><span class="id">Eksekusi otomatis di platform trading, hanya setelah strategi lolos simulasi.</span></p><span class="g-tag"><span class="en">simulated first</span><span class="id">simulasi dulu</span></span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="sec" id="demo" aria-labelledby="demo-h" tabindex="-1">
     <div class="wrap">
-      <p class="eyebrow">What's different</p>
-      <h2>Evidence over confidence.</h2>
-      <p class="sub">Every output says where it came from and how sure it is, so you can judge it yourself.</p>
-      <div class="grid2">
-        <div>
-          <div class="grid2" style="grid-template-columns:1fr;gap:16px">
-            <div class="card"><h3>Verified rulebooks</h3><p>Account rules are extracted with citations to the firm's own pages, not paraphrased from memory.</p></div>
-            <div class="card"><h3>Evidence-labeled strategy specs</h3><p>Each rule in a spec is marked as stated in the video, shown on the chart, or inferred, so guesses are never mistaken for facts.</p></div>
-            <div class="card"><h3>A strict backtest standard</h3><p>One written standard for costs, data splits and bias checks, applied to every strategy the same way.</p></div>
-            <div class="card"><h3>Risk guard before execution</h3><p>Account limits are enforced as a hard check, not a reminder.</p></div>
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">Try it</span><span class="id">Coba sendiri</span></p>
+        <h2 class="h2" id="demo-h"><span class="en">Lint a synthetic backtest.</span><span class="id">Periksa sebuah backtest sintetis.</span></h2>
+        <p class="sub"><span class="en">Turn each check on and watch what happens to an attractive-looking equity curve. Everything here is random data generated in your browser.</span><span class="id">Nyalakan setiap pengecekan dan lihat apa yang terjadi pada kurva equity yang tampak menarik. Semua di sini adalah data acak yang dibuat di browser Anda.</span></p>
+      </header>
+
+      <p class="notice" data-reveal><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18v.5"/></svg><span><span class="en"><strong>Synthetic data generated in your browser.</strong> Not a real strategy, not a result, not advice.</span><span class="id"><strong>Data sintetis yang dibuat di browser Anda.</strong> Bukan strategi nyata, bukan hasil, bukan saran.</span></span></p>
+
+      <div class="demo" data-reveal>
+        <div class="demo-main panel">
+          <div class="panel-bar">
+            <span class="file">synthetic_backtest.csv</span>
+            <span class="chip"><span class="en">Synthetic</span><span class="id">Sintetis</span></span>
+            <span class="mono" style="margin-left:auto" id="seed-lbl">seed 1</span>
           </div>
+          <div class="dc">
+            <svg id="dc" viewBox="0 0 640 290" role="img" data-label-en="Synthetic equity curve chart. Updates as checks are turned on." data-label-id="Grafik kurva equity sintetis. Berubah saat pengecekan dinyalakan.">
+              <rect class="holdr" id="dc-hold"/>
+              <g class="grid" id="dc-grid"></g>
+              <line class="zero" id="dc-zero"/>
+              <path class="ghost" id="dc-ghost"/>
+              <path class="lim" id="dc-lim"/>
+              <path class="eq" id="dc-eq"/>
+              <g class="bx" id="dc-bx"><circle class="ring" r="6"/><circle r="5"/></g>
+            </svg>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span><i class="l-eq"></i><span class="en">with checks</span><span class="id">dengan cek</span></span>
+            <span><i class="l-gh"></i><span class="en">unchecked</span><span class="id">belum dicek</span></span>
+            <span><i class="l-ho"></i><span class="en">holdout</span><span class="id">holdout</span></span>
+            <span><i class="l-li"></i><span class="en">max loss limit (example)</span><span class="id">batas rugi maks. (contoh)</span></span>
+          </div>
+          <div class="verdict" id="verdict" data-tone="warn" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="verdict-t"></span></div>
+          <dl class="metrics">
+            <div class="metric"><dt><span class="en">Net result</span><span class="id">Hasil bersih</span></dt><dd id="m-net">—</dd></div>
+            <div class="metric"><dt><span class="en">Max drawdown</span><span class="id">Drawdown maks.</span></dt><dd id="m-dd">—</dd></div>
+            <div class="metric"><dt><span class="en">Trades taken</span><span class="id">Trade dijalankan</span></dt><dd id="m-n">—</dd></div>
+            <div class="metric"><dt><span class="en">Checks on</span><span class="id">Cek aktif</span></dt><dd id="m-k">—</dd></div>
+            <p class="metrics-cap"><span class="en">Synthetic numbers · for illustration only</span><span class="id">Angka sintetis · hanya ilustrasi</span></p>
+          </dl>
         </div>
-        <div>
-          <div class="spec" role="figure" aria-label="Example of an evidence-labeled strategy spec">
-            <div class="bar mono"><span>strategy_spec.example</span><span>illustrative</span></div>
-            <ul>
-              <li><span class="tag t-said mono">said</span><span>Trade only during the New York morning session.</span></li>
-              <li><span class="tag t-shown mono">shown</span><span>Entry on a pullback to the prior swing level, as drawn on the chart.</span></li>
-              <li><span class="tag t-said mono">said</span><span>Stop goes below the most recent swing low.</span></li>
-              <li><span class="tag t-guess mono">guessed</span><span>Exit rule not stated; assumed fixed 2R target. Needs review.</span></li>
-            </ul>
-            <p class="note">Example format only. Not a recommendation and not a tested strategy.</p>
+
+        <div class="demo-side">
+          <button class="sw" type="button" role="switch" aria-checked="false" data-k="costs"><span class="sw-ui" aria-hidden="true"></span><span><b><span class="en">Fees &amp; slippage</span><span class="id">Biaya &amp; slippage</span></b><small><span class="en">Commission + 1 tick slippage per side</span><span class="id">Komisi + slippage 1 tick per sisi</span></small></span></button>
+          <div class="range off" id="range">
+            <label for="comm"><span><span class="en">Commission per round trip</span><span class="id">Komisi per round trip</span></span><output id="comm-out" for="comm">$4.00</output></label>
+            <input type="range" id="comm" min="0" max="10" step="0.5" value="4" disabled>
+          </div>
+          <button class="sw" type="button" role="switch" aria-checked="false" data-k="look"><span class="sw-ui" aria-hidden="true"></span><span><b><span class="en">Remove lookahead</span><span class="id">Hapus lookahead</span></b><small><span class="en">Signals use only bars that have closed</span><span class="id">Sinyal hanya memakai bar yang sudah tutup</span></small></span></button>
+          <button class="sw" type="button" role="switch" aria-checked="false" data-k="hold"><span class="sw-ui" aria-hidden="true"></span><span><b><span class="en">Sealed holdout</span><span class="id">Holdout tersegel</span></b><small><span class="en">Score the last 30% on data it was never tuned on</span><span class="id">Nilai 30% terakhir di data yang tidak dipakai untuk optimasi</span></small></span></button>
+          <button class="sw" type="button" role="switch" aria-checked="false" data-k="rules"><span class="sw-ui" aria-hidden="true"></span><span><b><span class="en">Prop firm rules</span><span class="id">Aturan prop firm</span></b><small><span class="en">Example: $2,000 trailing max loss</span><span class="id">Contoh: batas rugi trailing $2.000</span></small></span></button>
+          <div class="demo-btns">
+            <button class="btn btn-ghost btn-sm" type="button" id="all-on"><span class="en">Turn on all checks</span><span class="id">Nyalakan semua cek</span></button>
+            <button class="btn btn-ghost btn-sm" type="button" id="reseed"><span class="en">New synthetic data</span><span class="id">Data sintetis baru</span></button>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="status">
+  <!-- EVIDENCE -->
+  <section class="sec" id="different" aria-labelledby="diff-h">
     <div class="wrap">
-      <p class="eyebrow">Status</p>
-      <h2>Pre-launch. Building in public.</h2>
-      <p class="sub">There are no users, customers or performance results yet. Here is exactly where things stand.</p>
-      <ul class="road">
-        <li class="done"><span class="st mono">Done</span><b>Private prototype</b>Prop firm due-diligence dossier, sourced rules table, data plan, backtest standard, and agent skills for rule checking, video-to-strategy breakdown and backtest review.</li>
-        <li class="now"><span class="st mono">Now</span><b>First end-to-end backtest</b>Run the first strategy through the full backtest standard and publish the method, whatever the result.</li>
-        <li><span class="st mono">Next</span><b>Risk guard in simulation</b>Enforce account rules against simulated trading before any automation.</li>
-        <li><span class="st mono">Later</span><b>Early access for a small group of traders</b>Research and risk-control tooling first; execution features only after they are proven in simulation.</li>
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">What's different</span><span class="id">Apa bedanya</span></p>
+        <h2 class="h2" id="diff-h"><span class="en">Evidence over confidence.</span><span class="id">Bukti di atas keyakinan.</span></h2>
+        <p class="sub"><span class="en">Every output says where it came from and how sure it is, so you can judge it yourself.</span><span class="id">Setiap hasil menyebutkan asal-usulnya dan seberapa yakin, supaya Anda bisa menilainya sendiri.</span></p>
+      </header>
+      <div class="ev">
+        <div class="ev-list">
+          <div class="ev-item" data-reveal><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h12l4 4v12H4zM8 12h8M8 16h5"/></svg><div><h3><span class="en">Verified rulebooks</span><span class="id">Buku aturan terverifikasi</span></h3><p><span class="en">Account rules are extracted with citations to the firm's own pages, not paraphrased from memory.</span><span class="id">Aturan akun diambil lengkap dengan sitasi ke halaman resmi firm, bukan diparafrasekan dari ingatan.</span></p></div></div>
+          <div class="ev-item" data-reveal><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4M3 12h4M3 17h4M10 7h11M10 12h11M10 17h7"/></svg><div><h3><span class="en">Evidence-labeled strategy specs</span><span class="id">Spesifikasi strategi berlabel bukti</span></h3><p><span class="en">Each rule in a spec is marked as stated in the video, shown on the chart, or inferred, so guesses are never mistaken for facts.</span><span class="id">Setiap aturan dalam spesifikasi ditandai: diucapkan di video, ditunjukkan di grafik, atau disimpulkan, supaya tebakan tidak pernah dianggap fakta.</span></p></div></div>
+          <div class="ev-item" data-reveal><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4M4 20h16M8 16l4-5 3 3 5-7"/></svg><div><h3><span class="en">A strict backtest standard</span><span class="id">Standar backtest yang ketat</span></h3><p><span class="en">One written standard for costs, data splits and bias checks, applied to every strategy the same way.</span><span class="id">Satu standar tertulis untuk biaya, pembagian data, dan cek bias, diterapkan sama ke setiap strategi.</span></p></div></div>
+          <div class="ev-item" data-reveal><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/></svg><div><h3><span class="en">Risk guard before execution</span><span class="id">Risk guard sebelum eksekusi</span></h3><p><span class="en">Account limits are enforced as a hard check, not a reminder.</span><span class="id">Batas akun ditegakkan sebagai pengecekan wajib, bukan sekadar pengingat.</span></p></div></div>
+        </div>
+        <figure class="ev-spec panel spec" style="margin:0" data-reveal data-label-en="Example of an evidence-labeled strategy spec" data-label-id="Contoh spesifikasi strategi berlabel bukti" role="figure">
+          <div class="panel-bar"><span class="file" style="display:inline">strategy_spec.example</span><span class="chip" style="margin-left:auto"><span class="en">Illustrative</span><span class="id">Ilustrasi</span></span></div>
+          <ul>
+            <li data-spec><span class="tag t-said"><span class="en">said</span><span class="id">diucapkan</span></span><span><span class="en">Trade only during the New York morning session.</span><span class="id">Trading hanya di sesi pagi New York.</span></span></li>
+            <li data-spec><span class="tag t-shown"><span class="en">shown</span><span class="id">ditunjukkan</span></span><span><span class="en">Entry on a pullback to the prior swing level, as drawn on the chart.</span><span class="id">Entry saat pullback ke level swing sebelumnya, seperti digambar di grafik.</span></span></li>
+            <li data-spec><span class="tag t-said"><span class="en">said</span><span class="id">diucapkan</span></span><span><span class="en">Stop goes below the most recent swing low.</span><span class="id">Stop di bawah swing low terakhir.</span></span></li>
+            <li data-spec><span class="tag t-guess"><span class="en">guessed</span><span class="id">ditebak</span></span><span><span class="en">Exit rule not stated; assumed fixed 2R target. Needs review.</span><span class="id">Aturan exit tidak disebut; diasumsikan target tetap 2R. Perlu ditinjau.</span></span></li>
+          </ul>
+          <p class="note"><span class="en">Example format only. Not a recommendation and not a tested strategy.</span><span class="id">Contoh format saja. Bukan rekomendasi dan bukan strategi yang sudah diuji.</span></p>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section class="sec" id="status" aria-labelledby="status-h" tabindex="-1">
+    <div class="wrap">
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">Status</span><span class="id">Status</span></p>
+        <h2 class="h2" id="status-h"><span class="en">Pre-launch. Building in public.</span><span class="id">Pra-peluncuran. Dibangun secara terbuka.</span></h2>
+        <p class="sub"><span class="en">There are no users, customers or performance results yet. Here is exactly where things stand.</span><span class="id">Belum ada pengguna, pelanggan, atau hasil performa. Inilah posisi sebenarnya saat ini.</span></p>
+      </header>
+      <div class="road" id="road">
+        <span class="road-line" aria-hidden="true"><span class="road-fill" id="road-fill"></span></span>
+        <ol>
+        <li class="done" data-reveal><span class="st"><span class="en">Done</span><span class="id">Selesai</span></span><h3><span class="en">Private prototype</span><span class="id">Prototipe privat</span></h3><p><span class="en">Prop firm due-diligence dossier, sourced rules table, data plan, backtest standard, and agent skills for rule checking, video-to-strategy breakdown and backtest review.</span><span class="id">Dosir due-diligence prop firm, tabel aturan bersumber, rencana data, standar backtest, serta skill agent untuk cek aturan, bedah video menjadi strategi, dan tinjauan backtest.</span></p></li>
+        <li class="now" data-reveal><span class="st"><span class="en">Now</span><span class="id">Sekarang</span></span><h3><span class="en">First end-to-end backtest</span><span class="id">Backtest end-to-end pertama</span></h3><p><span class="en">Run the first strategy through the full backtest standard and publish the method, whatever the result.</span><span class="id">Menjalankan strategi pertama melalui standar backtest lengkap dan memublikasikan metodenya, apa pun hasilnya.</span></p></li>
+        <li data-reveal><span class="st"><span class="en">Next</span><span class="id">Berikutnya</span></span><h3><span class="en">Risk guard in simulation</span><span class="id">Risk guard di simulasi</span></h3><p><span class="en">Enforce account rules against simulated trading before any automation.</span><span class="id">Menegakkan aturan akun pada trading simulasi sebelum ada otomatisasi.</span></p></li>
+        <li data-reveal><span class="st"><span class="en">Later</span><span class="id">Nanti</span></span><h3><span class="en">Early access for a small group of traders</span><span class="id">Akses awal untuk sekelompok kecil trader</span></h3><p><span class="en">Research and risk-control tooling first; execution features only after they are proven in simulation.</span><span class="id">Alat riset dan kontrol risiko lebih dulu; fitur eksekusi hanya setelah terbukti di simulasi.</span></p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILT WITH CLAUDE -->
+  <section class="sec" id="claude" aria-labelledby="claude-h" tabindex="-1">
+    <div class="wrap bwc">
+      <header class="sh" data-reveal>
+        <p class="eyebrow"><span class="en">How it's built</span><span class="id">Cara membangunnya</span></p>
+        <h2 class="h2" id="claude-h"><span class="en">Built with Claude.</span><span class="id">Dibangun dengan Claude.</span></h2>
+        <p class="sub"><span class="en">EdgeLint is built by one founder with Claude Code, and its research agents run on the Claude API.</span><span class="id">EdgeLint dibangun oleh satu founder dengan Claude Code, dan agent risetnya berjalan di Claude API.</span></p>
+        <p class="indep"><span class="en">EdgeLint is an independent project, not affiliated with or endorsed by Anthropic.</span><span class="id">EdgeLint adalah proyek independen, tidak berafiliasi dengan atau didukung oleh Anthropic.</span></p>
+      </header>
+      <ul class="bwc-list">
+        <li data-reveal><span class="via">Claude API</span><div><h3><span class="en">Rule research</span><span class="id">Riset aturan</span></h3><p><span class="en">Reads a firm's published rule pages and returns each rule with a link to where it came from.</span><span class="id">Membaca halaman aturan resmi sebuah firm dan mengembalikan setiap aturan beserta tautan ke sumbernya.</span></p></div></li>
+        <li data-reveal><span class="via">Claude API</span><div><h3><span class="en">Video breakdown</span><span class="id">Bedah video</span></h3><p><span class="en">Turns a transcript and chart frames into a strategy spec, labeling every rule as said, shown or guessed.</span><span class="id">Mengubah transkrip dan frame grafik menjadi spesifikasi strategi, dengan label diucapkan, ditunjukkan, atau ditebak di setiap aturan.</span></p></div></li>
+        <li data-reveal><span class="via">Claude API</span><div><h3><span class="en">Backtest review</span><span class="id">Tinjauan backtest</span></h3><p><span class="en">Checks each backtest against the written standard and lists what fails.</span><span class="id">Mengecek setiap backtest terhadap standar tertulis dan mendaftar bagian yang gagal.</span></p></div></li>
+        <li data-reveal><span class="via">Claude Code</span><div><h3><span class="en">The build itself</span><span class="id">Pembangunannya sendiri</span></h3><p><span class="en">The prototype, the agent skills and this website were written with Claude Code.</span><span class="id">Prototipe, skill agent, dan website ini ditulis dengan Claude Code.</span></p></div></li>
       </ul>
     </div>
   </section>
 
-  <section id="founder">
+  <!-- FOUNDER -->
+  <section class="sec" id="founder" aria-labelledby="founder-h">
     <div class="wrap">
-      <p class="eyebrow">Who's building it</p>
-      <div class="founder">
+      <p class="eyebrow" data-reveal><span class="en">Who's building it</span><span class="id">Siapa yang membangun</span></p>
+      <div class="founder" data-reveal>
         <div class="avatar" aria-hidden="true">D</div>
-        <div><strong>Dipsy</strong><br><span style="color:var(--muted)">Solo founder, Indonesia</span></div>
+        <div>
+          <p class="founder-line" id="founder-h">Dipsy, Founder, Indonesia</p>
+          <p><span class="en">Bootstrapped and building in public. Questions, feedback or early access requests come straight to me.</span><span class="id">Bootstrapped dan dibangun secara terbuka. Pertanyaan, masukan, atau permintaan akses awal langsung sampai ke saya.</span></p>
+          <div class="cta">
+            <a class="btn btn-primary" href="mailto:dipsy@edgelint.com?subject=EdgeLint%20early%20access"><span class="en">Get early access</span><span class="id">Minta akses awal</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+            <a class="btn btn-ghost" href="mailto:dipsy@edgelint.com">dipsy@edgelint.com</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </main>
 
-<footer>
+<footer class="foot">
   <div class="wrap">
-    <div class="disclaimer">
-      <strong>Risk disclaimer</strong>
-      Trading futures involves substantial risk of loss. This product is a research and risk-control tool, not financial advice. Past or simulated performance does not guarantee future results.
+    <div class="disc">
+      <strong><span class="en">Risk disclaimer</span><span class="id">Peringatan risiko</span></strong>
+      <p>Trading futures involves substantial risk of loss. This product is a research and risk-control tool, not financial advice. Past or simulated performance does not guarantee future results.</p>
+      <p class="id">Trading futures memiliki risiko kerugian yang besar. Produk ini adalah alat riset dan kontrol risiko, bukan nasihat keuangan. Kinerja masa lalu atau hasil simulasi tidak menjamin hasil di masa depan.</p>
     </div>
-    <div class="foot">
+    <div class="foot-row">
       <span>© <span id="y">2026</span> EdgeLint</span>
-      <a href="mailto:hello@edgelint.com">hello@edgelint.com</a>
+      <a href="mailto:dipsy@edgelint.com">dipsy@edgelint.com</a>
+      <a href="#main"><span class="en">Back to top ↑</span><span class="id">Kembali ke atas ↑</span></a>
     </div>
   </div>
 </footer>
 
-<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  'use strict';
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var root=document.documentElement;
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var G=window.gsap, ST=window.ScrollTrigger;
+  var motion=!!(G&&ST)&&!reduce;
+  if(motion){root.classList.add('m','m-ok');G.registerPlugin(ST)}else{root.classList.remove('m')}
+  var lenis=null;
+  $('#y').textContent=new Date().getFullYear();
+
+  /* ---------- helpers ---------- */
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function gauss(r){var u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+  function smooth(p){if(p.length<2)return'';var d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);for(var i=0;i<p.length-1;i++){var a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;d+='C'+(b[0]+(c[0]-a[0])/6).toFixed(1)+','+(b[1]+(c[1]-a[1])/6).toFixed(1)+' '+(c[0]-(e[0]-b[0])/6).toFixed(1)+','+(c[1]-(e[1]-b[1])/6).toFixed(1)+' '+c[0].toFixed(1)+','+c[1].toFixed(1)}return d}
+  function lineP(p){return p.map(function(q,i){return(i?'L':'M')+q[0].toFixed(1)+','+q[1].toFixed(1)}).join('')}
+  function lerpA(a,b,t){return a.map(function(v,i){return v+(b[i]-v)*t})}
+  function attr(el,o){for(var k in o)el.setAttribute(k,o[k]);return el}
+  var NS='http://www.w3.org/2000/svg';
+  function svgEl(tag,o){return attr(document.createElementNS(NS,tag),o||{})}
+
+  /* ---------- language ---------- */
+  var META={
+    en:{t:'EdgeLint — Lint your futures strategy before your account pays for it',d:'EdgeLint is a pre-launch set of AI agents that turn prop firm rules and trading ideas into sourced rulebooks, labeled strategy specs and strict backtests. A research and risk-control tool, not financial advice.'},
+    id:{t:'EdgeLint — Periksa strategi futures Anda sebelum akun Anda yang membayarnya',d:'EdgeLint adalah kumpulan agent AI pra-peluncuran yang mengubah aturan prop firm dan ide trading menjadi buku aturan bersumber, spesifikasi strategi berlabel, dan backtest yang ketat. Alat riset dan kontrol risiko, bukan nasihat keuangan.'}
+  };
+  var onLang=[];
+  function setLang(l,save){
+    root.lang=l;
+    $$('[data-lang]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-lang')===l))});
+    document.title=META[l].t; $('meta[name=description]').setAttribute('content',META[l].d);
+    $$('[data-label-en]').forEach(function(e){e.setAttribute('aria-label',e.getAttribute('data-label-'+l))});
+    if(save){try{localStorage.setItem('el-lang',l)}catch(e){}}
+    onLang.forEach(function(f){f()});
+    if(motion)ST.refresh();
+  }
+  $$('[data-lang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-lang'),true)})});
+
+  /* ---------- header + mobile menu ---------- */
+  var top=$('#top');
+  function onScroll(){top.classList.toggle('scrolled',window.scrollY>8)}
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  var menu=$('#menu'), mbtn=$('.menu-btn');
+  function focusables(){return [mbtn].concat($$('a,button',menu))}
+  function openMenu(){
+    menu.hidden=false; mbtn.setAttribute('aria-expanded','true');
+    requestAnimationFrame(function(){menu.classList.add('open')});
+    document.body.style.overflow='hidden'; if(lenis)lenis.stop();
+    var f=$('a',menu); if(f)f.focus();
+  }
+  function closeMenu(refocus){
+    mbtn.setAttribute('aria-expanded','false'); menu.classList.remove('open');
+    document.body.style.overflow=''; if(lenis)lenis.start();
+    setTimeout(function(){if(mbtn.getAttribute('aria-expanded')==='false')menu.hidden=true},reduce?0:300);
+    if(refocus)mbtn.focus();
+  }
+  mbtn.addEventListener('click',function(){mbtn.getAttribute('aria-expanded')==='true'?closeMenu(true):openMenu()});
+  document.addEventListener('keydown',function(e){
+    if(menu.hidden)return;
+    if(e.key==='Escape'){closeMenu(true);return}
+    if(e.key==='Tab'){var f=focusables(),first=f[0],last=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+  });
+  matchMedia('(min-width: 960px)').addEventListener('change',function(e){if(e.matches&&!menu.hidden)closeMenu(false)});
+
+  /* in-page links: smooth scroll + move focus */
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[href^="#"]'); if(!a)return;
+    var id=a.getAttribute('href'); if(id.length<2)return;
+    var t=document.querySelector(id); if(!t)return;
+    e.preventDefault();
+    if(!menu.hidden)closeMenu(false);
+    if(lenis)lenis.scrollTo(t,{offset:-72,duration:1.3});
+    else t.scrollIntoView({behavior:reduce?'auto':'smooth'});
+    if(!t.hasAttribute('tabindex'))t.setAttribute('tabindex','-1');
+    t.focus({preventScroll:true});
+    history.replaceState(null,'',id==='#main'?location.pathname:id);
+  });
+
+  /* ---------- hero lint chart ---------- */
+  var H={x0:14,x1:626,y0:20,y1:310,lo:22,hi:178,N:64,hold:.68,limit:86};
+  (function(){
+    var r=rng(11),w=0,j1=[],j2=[],i;
+    for(i=0;i<H.N;i++){w=w*.72+(r()-.5)*7;j1.push(w)}
+    w=0;for(i=0;i<H.N;i++){w=w*.6+(r()-.5)*9;j2.push(w)}
+    var T=function(i){return i/(H.N-1)}, ez=function(t){return t*t*(3-2*t)};
+    H.T=T;
+    H.naive=j1.map(function(j,i){return 100+64*ez(T(i))+j});
+    H.costs=H.naive.map(function(v,i){return v-24*T(i)});
+    H.look=H.costs.map(function(v,i){return v-20*Math.pow(T(i),1.2)+j2[i]*.6});
+    H.final=H.look.map(function(v,i){return T(i)>H.hold?v-88*Math.pow((T(i)-H.hold)/(1-H.hold),1.5):v});
+  })();
+  function hx(i){return H.x0+(H.x1-H.x0)*H.T(i)}
+  function hy(v){return H.y1-(v-H.lo)/(H.hi-H.lo)*(H.y1-H.y0)}
+  function hpts(a){return a.map(function(v,i){return[hx(i),hy(v)]})}
+  var hb=H.final.findIndex(function(v,i){return i>H.N/2&&v<H.limit});
+  var hcross=(function(){var a=H.final[hb-1],b=H.final[hb],f=(a-H.limit)/(a-b);return[hx(hb-1)+(hx(hb)-hx(hb-1))*f,hy(H.limit)]})();
+  var lcEq=$('#lc-eq'),lcTail=$('#lc-tail'),lcGhost=$('#lc-ghost');
+  (function(){
+    var g=$('#lc-grid');
+    for(var x=0;x<=8;x++){var X=H.x0+(H.x1-H.x0)*x/8;g.appendChild(svgEl('line',{x1:X,x2:X,y1:H.y0,y2:H.y1}))}
+    for(var y=0;y<=5;y++){var Y=H.y0+(H.y1-H.y0)*y/5;g.appendChild(svgEl('line',{x1:H.x0,x2:H.x1,y1:Y,y2:Y}))}
+    attr($('#lc-base'),{x1:H.x0,x2:H.x1,y1:hy(100),y2:hy(100)});
+    var hx0=hx(Math.round(H.hold*(H.N-1)));
+    attr($('#lc-hold-r'),{x:hx0,y:H.y0,width:H.x1-hx0,height:H.y1-H.y0});
+    attr($('#lc-hold-l'),{x1:hx0,x2:hx0,y1:H.y0,y2:H.y1});
+    ['#lc-hold-t1','#lc-hold-t2'].forEach(function(s){attr($(s),{x:hx0+10,y:H.y1-12})});
+    attr($('#lc-limit-l'),{x1:H.x0,x2:H.x1,y1:hy(H.limit),y2:hy(H.limit)});
+    ['#lc-limit-t1','#lc-limit-t2'].forEach(function(s){attr($(s),{x:H.x0+8,y:hy(H.limit)+18})});
+    lcGhost.setAttribute('d',smooth(hpts(H.naive)));
+    var ge=hpts(H.naive)[H.N-1];
+    ['#lc-gl1','#lc-gl2'].forEach(function(s){attr($(s),{x:ge[0]-4,y:ge[1]-12})});
+    var br=$('#lc-breach');
+    $$('circle',br).forEach(function(c){attr(c,{cx:hcross[0],cy:hcross[1]})});
+    attr($('#lc-br-r'),{x:hcross[0]-74,y:hcross[1]-30});
+    attr($('#lc-br-t'),{x:hcross[0]-67,y:hcross[1]-16.5});
+  })();
+  var finalPts=hpts(H.final), mainPts=finalPts.slice(0,hb).concat([hcross]), tailPts=[hcross].concat(finalPts.slice(hb));
+  function heroFinal(){
+    lcEq.setAttribute('d',smooth(mainPts)); lcTail.setAttribute('d',smooth(tailPts));
+  }
+  var logItems=$$('#log li'), heroTl=null;
+  var heroLayers=['#lc-ghost','#lc-gl1','#lc-gl2','#lc-hold','#lc-limit','#lc-tail','#lc-breach'].map(function(s){return $(s)});
+  function morph(tl,a,b){var o={t:0};tl.to(o,{t:1,duration:.95,ease:'power2.inOut',onUpdate:function(){lcEq.setAttribute('d',smooth(hpts(lerpA(a,b,o.t))))}})}
+  function heroReset(){
+    if(heroTl)heroTl.kill();
+    G.set(heroLayers,{autoAlpha:0}); G.set(logItems,{autoAlpha:0,x:-10});
+    lcEq.setAttribute('d',smooth(hpts(H.naive)));
+    var L=lcEq.getTotalLength(); G.set(lcEq,{strokeDasharray:L,strokeDashoffset:L});
+  }
+  function heroPlay(){
+    heroReset();
+    var tl=heroTl=G.timeline({delay:.15});
+    tl.to(lcEq,{strokeDashoffset:0,duration:1.6,ease:'power2.inOut'})
+      .set(lcEq,{clearProps:'strokeDasharray,strokeDashoffset'})
+      .to(['#lc-ghost','#lc-gl1','#lc-gl2'],{autoAlpha:1,duration:.4})
+      .to(logItems[0],{autoAlpha:1,x:0,duration:.4,ease:'power3.out'},'+=.2');
+    morph(tl,H.naive,H.costs);
+    tl.to(logItems[1],{autoAlpha:1,x:0,duration:.4,ease:'power3.out'},'+=.35');
+    morph(tl,H.costs,H.look);
+    tl.to(logItems[2],{autoAlpha:1,x:0,duration:.4,ease:'power3.out'},'+=.35')
+      .to('#lc-hold',{autoAlpha:1,duration:.5},'<');
+    morph(tl,H.look,H.final);
+    tl.to(logItems[3],{autoAlpha:1,x:0,duration:.4,ease:'power3.out'},'+=.35')
+      .fromTo('#lc-limit-l',{attr:{x2:H.x0}},{attr:{x2:H.x1},duration:.8,ease:'power2.out'},'<')
+      .to('#lc-limit',{autoAlpha:1,duration:.3},'<')
+      .call(heroFinal)
+      .to('#lc-tail',{autoAlpha:1,duration:.5})
+      .fromTo('#lc-breach',{autoAlpha:0,scale:.4,svgOrigin:hcross[0]+' '+hcross[1]},{autoAlpha:1,scale:1,duration:.6,ease:'back.out(2)'},'<')
+      .to(logItems[4],{autoAlpha:1,x:0,duration:.5,ease:'power3.out'},'+=.15');
+  }
+  heroFinal();
+
+  /* ---------- demo ---------- */
+  var D={N:220,hold:.7,slip:10,limit:2000,edge:4,look:30,fit:18,sd:140,x0:56,x1:628,y0:14,y1:262};
+  var st={costs:false,look:false,hold:false,rules:false,comm:4,seed:1};
+  var z=[];
+  function seedZ(){var r=rng(st.seed*9973+7);z=[];for(var i=0;i<D.N;i++)z.push(gauss(r)*D.sd)}
+  function sim(s){
+    var eq=[0],lim=[],peak=0,b=-1,e=0,mdd=0,n=0,hs=Math.floor(D.N*D.hold);
+    for(var i=0;i<D.N;i++){
+      if(b<0){
+        var p=z[i]+D.edge+(s.look?0:D.look)+((s.hold&&i>=hs)?0:D.fit)-(s.costs?s.comm+D.slip*2:0);
+        e+=p;n++;peak=Math.max(peak,e);mdd=Math.max(mdd,peak-e);
+        if(s.rules&&peak-e>=D.limit)b=i+1;
+      }
+      eq.push(e);
+    }
+    peak=0;for(i=0;i<=D.N;i++){peak=Math.max(peak,eq[i]);lim.push(peak-D.limit)}
+    return{eq:eq,lim:lim,b:b,net:e,mdd:mdd,n:n};
+  }
+  var dEq=$('#dc-eq'),dGh=$('#dc-ghost'),dLim=$('#dc-lim'),dGrid=$('#dc-grid'),dBx=$('#dc-bx'),dHold=$('#dc-hold'),dZero=$('#dc-zero');
+  var cur=null,dTween=null;
+  function domain(r,g){var a=r.eq.concat(g.eq);if(st.rules)a=a.concat(r.lim);var lo=Math.min.apply(null,a),hi=Math.max.apply(null,a);var pad=(hi-lo)*.08||500;return[lo-pad,hi+pad]}
+  function fmt(v,signed){var l=root.lang==='id'?'id-ID':'en-US';var s=Math.round(Math.abs(v)).toLocaleString(l);return(signed?(v<0?'−':'+'):'')+'$'+s}
+  function draw(f){
+    var lo=f.dom[0],hi=f.dom[1];
+    var X=function(i){return D.x0+(D.x1-D.x0)*i/D.N},Y=function(v){return D.y1-(v-lo)/(hi-lo)*(D.y1-D.y0)};
+    var P=function(a){return a.map(function(v,i){return[X(i),Y(v)]})};
+    var span=hi-lo,steps=[250,500,1000,2000,2500,5000,10000,20000,25000,50000],step=steps[steps.length-1];
+    for(var k=0;k<steps.length;k++){if(span/steps[k]<=5){step=steps[k];break}}
+    dGrid.textContent='';
+    for(var v=Math.ceil(lo/step)*step;v<=hi;v+=step){
+      var y=Y(v);dGrid.appendChild(svgEl('line',{x1:D.x0,x2:D.x1,y1:y,y2:y}));
+      var t=svgEl('text',{x:D.x0-8,y:y+4,'text-anchor':'end'});t.textContent=(v<0?'−':'')+'$'+(Math.abs(v)>=1000?(Math.abs(v)/1000)+'k':Math.abs(v));dGrid.appendChild(t);
+    }
+    attr(dZero,{x1:D.x0,x2:D.x1,y1:Y(0),y2:Y(0)});
+    dGh.setAttribute('d',lineP(P(f.ghost)));
+    dEq.setAttribute('d',lineP(P(f.eq)));
+    dLim.setAttribute('d',lineP(P(f.lim)));
+    var hx0=X(Math.floor(D.N*D.hold));
+    attr(dHold,{x:hx0,y:D.y0,width:D.x1-hx0,height:D.y1-D.y0});
+    if(f.b>0){$$('circle',dBx).forEach(function(c){attr(c,{cx:X(f.b),cy:Y(f.eq[f.b])})})}
+  }
+  function verdict(r){
+    var on=['costs','look','hold','rules'].filter(function(k){return st[k]}).length,tone,en,id;
+    if(st.rules&&r.b>0){tone='bad';en='<strong>Blocked by the risk guard.</strong> The example max loss limit was crossed at trade '+r.b+', so trading stops there.';id='<strong>Diblokir oleh risk guard.</strong> Contoh batas rugi maksimum terlewati di trade ke-'+r.b+', jadi trading berhenti di situ.'}
+    else if(on<4){tone='warn';var off=4-on;en='<strong>Not trustworthy yet.</strong> '+off+' check'+(off>1?'s are':' is')+' still off. Turn them on to see what is left.';id='<strong>Belum bisa dipercaya.</strong> '+off+' cek masih mati. Nyalakan untuk melihat apa yang tersisa.'}
+    else if(r.net<=0){tone='bad';en='<strong>No edge left.</strong> With every check on, this synthetic data loses money.';id='<strong>Tidak ada edge tersisa.</strong> Dengan semua cek aktif, data sintetis ini merugi.'}
+    else{tone='good';en='<strong>Survives these checks</strong> on this synthetic data. A real strategy would move on to simulation next, not to a live account.';id='<strong>Lolos pengecekan ini</strong> pada data sintetis ini. Strategi nyata akan lanjut ke simulasi dulu, bukan ke akun live.'}
+    $('#verdict').setAttribute('data-tone',tone);
+    $('#verdict-t').innerHTML='<span class="en">'+en+'</span><span class="id">'+id+'</span>';
+    return on;
+  }
+  var lastR=null;
+  function metrics(r,on){
+    lastR=r;$('#m-net').textContent=fmt(r.net,true);
+    $('#m-dd').textContent=r.mdd>0?'−'+fmt(r.mdd):fmt(0);$('#m-n').textContent=r.n+' / '+D.N;$('#m-k').textContent=on+' / 4';
+  }
+  onLang.push(function(){if(lastR)metrics(lastR,verdict(lastR))});
+  function update(animate){
+    var r=sim(st),g=sim({costs:false,look:false,hold:false,rules:false,comm:0});
+    var next={eq:r.eq,ghost:g.eq,lim:r.lim,dom:domain(r,g),b:r.b};
+    dLim.style.opacity=st.rules?1:0; dHold.style.opacity=st.hold?1:0; dBx.style.opacity=(st.rules&&r.b>0)?1:0;
+    metrics(r,verdict(r));
+    $('#seed-lbl').textContent='seed '+st.seed;
+    if(dTween)dTween.kill();
+    if(animate&&motion&&cur){
+      var from=cur,o={t:0};
+      dTween=G.to(o,{t:1,duration:.7,ease:'power3.inOut',onUpdate:function(){
+        cur={eq:lerpA(from.eq,next.eq,o.t),ghost:lerpA(from.ghost,next.ghost,o.t),lim:lerpA(from.lim,next.lim,o.t),dom:lerpA(from.dom,next.dom,o.t),b:next.b};
+        draw(cur);
+      }});
+    }else{draw(next);cur=next}
+  }
+  $$('.sw').forEach(function(b){b.addEventListener('click',function(){
+    var k=b.getAttribute('data-k');st[k]=!st[k];b.setAttribute('aria-checked',String(st[k]));
+    if(k==='costs'){$('#comm').disabled=!st.costs;$('#range').classList.toggle('off',!st.costs)}
+    update(true);
+  })});
+  $('#comm').addEventListener('input',function(e){st.comm=+e.target.value;$('#comm-out').textContent='$'+st.comm.toFixed(2);update(false)});
+  $('#all-on').addEventListener('click',function(){['costs','look','hold','rules'].forEach(function(k){st[k]=true});$$('.sw').forEach(function(b){b.setAttribute('aria-checked','true')});$('#comm').disabled=false;$('#range').classList.remove('off');update(true)});
+  $('#reseed').addEventListener('click',function(){st.seed++;seedZ();update(true)});
+  seedZ();update(false);
+
+  setLang(root.lang==='id'?'id':'en',false);
+
+  /* ---------- motion ---------- */
+  if(!motion){
+    $$('.gate').forEach(function(g){g.classList.add('on')});
+    $('#road-fill').style.transform='none';
+    return;
+  }
+
+  if(window.Lenis){
+    lenis=new Lenis({duration:1.15,smoothWheel:true});
+    lenis.on('scroll',ST.update);
+    G.ticker.add(function(t){lenis.raf(t*1000)});
+    G.ticker.lagSmoothing(0);
+  }
+
+  /* intro */
+  var intro=G.timeline({defaults:{ease:'power3.out'}});
+  intro.from('.top',{y:-20,autoAlpha:0,duration:.6})
+    .to('.hero [data-intro]',{autoAlpha:1,y:0,duration:.9,stagger:.09},'<.1')
+    .call(function(){$$('.sq').forEach(function(s){s.classList.add('on')})},null,'-=.3')
+    .call(function(){ST.create({trigger:'.hero-fig',start:'top 85%',once:true,onEnter:heroPlay})},null,'-=.5');
+  heroReset();
+  $('#replay').addEventListener('click',heroPlay);
+  G.to('.hero-bg',{yPercent:12,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+
+  /* reveals */
+  ST.batch('[data-reveal]',{start:'top 88%',once:true,onEnter:function(els){G.to(els,{autoAlpha:1,y:0,duration:.85,stagger:.08,ease:'power3.out',overwrite:true})}});
+
+  /* icon line draw */
+  $$('.card').forEach(function(c){
+    var ps=$$('.draw',c);ps.forEach(function(p){var l=p.getTotalLength();G.set(p,{strokeDasharray:l,strokeDashoffset:l})});
+    ST.create({trigger:c,start:'top 85%',once:true,onEnter:function(){G.to(ps,{strokeDashoffset:0,duration:1.1,stagger:.15,ease:'power2.inOut',delay:.25})}});
+  });
+
+  /* spec lines type in */
+  G.set('[data-spec]',{autoAlpha:0,x:-8});
+  ST.create({trigger:'.spec',start:'top 75%',once:true,onEnter:function(){G.to('[data-spec]',{autoAlpha:1,x:0,duration:.5,stagger:.22,ease:'power2.out',delay:.3})}});
+
+  /* roadmap line */
+  G.fromTo('#road-fill',{scaleY:0},{scaleY:1,ease:'none',scrollTrigger:{trigger:'#road',start:'top 70%',end:'bottom 60%',scrub:.6}});
+
+  /* gates */
+  var gates=$$('.gate');
+  function lightGates(p){gates.forEach(function(g,i){g.classList.toggle('on',p>.02&&p>=i/(gates.length-1)-.02)})}
+  var mm=G.matchMedia();
+  mm.add('(min-width: 960px)',function(){
+    var rail=$('.rail');
+    var tl=G.timeline({scrollTrigger:{trigger:'#how',start:'top top',end:'+=1100',pin:true,scrub:.7,anticipatePin:1,onUpdate:function(s){lightGates(s.progress)}}});
+    tl.fromTo('#rail-fill',{scaleX:0},{scaleX:1,ease:'none'},0)
+      .fromTo('#token',{x:0},{x:function(){return rail.offsetWidth},ease:'none'},0);
+    return function(){gates.forEach(function(g){g.classList.remove('on')})};
+  });
+  mm.add('(max-width: 959.98px)',function(){
+    var rail=$('.rail');
+    G.timeline({scrollTrigger:{trigger:'#gates',start:'top 65%',end:'bottom 65%',scrub:.5,onUpdate:function(s){lightGates(s.progress)}}})
+      .fromTo('#rail-fill',{scaleY:0},{scaleY:1,ease:'none'},0)
+      .fromTo('#token',{y:0},{y:function(){return rail.offsetHeight},ease:'none'},0);
+    return function(){gates.forEach(function(g){g.classList.remove('on')})};
+  });
+
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){ST.refresh()});
+  window.addEventListener('load',function(){ST.refresh()});
+});
+</script>
 </body>
 </html>
